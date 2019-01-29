@@ -164,7 +164,7 @@ class Logger extends AbstractLogger implements LogManagerInterface
 
         } catch (\ReflectionException $e) {
 
-            throw new InvalidArgumentException("Con not create [{$name}]. {$e->getMessage()}");
+            throw new InvalidArgumentException("Con not create [{$name}].", 0, $e);
         }
     }
 }
