@@ -27,7 +27,7 @@ trait MessageFormatter
         $processed = strtr($message, $replace);
 
         if(isset($stackTrace)) {
-            $processed .= "/n{$stackTrace}";
+            $processed .= "\n{$stackTrace}";
         }
 
         return $processed;
