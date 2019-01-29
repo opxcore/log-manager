@@ -2,10 +2,13 @@
 
 namespace OpxCore\Log\Channels;
 
+use OpxCore\Log\MessageFormatter;
 use Psr\Log\AbstractLogger;
 
 class FileWriter extends AbstractLogger
 {
+    use MessageFormatter;
+
     protected $filename;
 
     public function __construct($filename)
@@ -24,6 +27,8 @@ class FileWriter extends AbstractLogger
      */
     public function log($level, $message, array $context = []): void
     {
-        echo "{$level}: {$message}";
+        $formatted = $this->interpolateMessage($message, $context);
+
+        echo "{$level}: {$formatted}";
     }
 }
