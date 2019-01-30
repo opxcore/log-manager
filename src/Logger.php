@@ -2,6 +2,7 @@
 
 namespace OpxCore\Log;
 
+use OpxCore\Container\Container;
 use OpxCore\Interfaces\LogManagerInterface;
 use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException;
@@ -14,12 +15,8 @@ class Logger extends AbstractLogger implements LogManagerInterface
      */
     protected $config;
 
-    /**
-     * Loggers instances keyed by channel name.
-     *
-     * @var array
-     */
-    protected $channels = [];
+
+    protected $resolver;
 
     /**
      * Logger constructor.
@@ -30,6 +27,7 @@ class Logger extends AbstractLogger implements LogManagerInterface
      */
     public function __construct($config)
     {
+        $this->resolver = new Container();
         $this->config = $config;
     }
 
@@ -96,8 +94,15 @@ class Logger extends AbstractLogger implements LogManagerInterface
      */
     protected function resolveChannel($name): LoggerInterface
     {
-        if (isset($this->channels[$name])) {
-            return $this->channels[$name];
+        if ($this->resolver->has($name)) {
+            try {
+                $driver = $this->resolver->make($name);
+            } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
+
+                throw new InvalidArgumentException("Con not create [{$name}].", 0, $e);
+            }
+
+            return $driver;
         }
 
         $config = $this->config['channels'][$name] ?? null;
@@ -112,7 +117,7 @@ class Logger extends AbstractLogger implements LogManagerInterface
 
         $driver = $this->makeDriver($driverClass, $config);
 
-        $this->channels[$name] = $driver;
+        $this->resolver->instance($name, $driver);
 
         return $driver;
     }
@@ -130,39 +135,15 @@ class Logger extends AbstractLogger implements LogManagerInterface
     protected function makeDriver($name, $parameters): LoggerInterface
     {
         try {
-            $reflection = new \ReflectionClass($name);
-
-            if (!$reflection->isInstantiable()) {
-                throw new InvalidArgumentException("[{$name}] is not instantiable");
-            }
-
-            $constructor = $reflection->getConstructor();
-
-            if ($constructor === null) {
-                return new $name;
-            }
-
-            $expectedArguments = $constructor->getParameters();
-
-            $arguments = [];
-
-            foreach ($expectedArguments as $argument) {
-                if (!isset($parameters[$argument->name]) && (!$argument->isDefaultValueAvailable())) {
-                    throw new InvalidArgumentException("Can not create [{$name}]. Parameter [{$argument->name} is required.]");
-                }
-
-                $arguments[] = $parameters[$argument->name] ?? $argument->getDefaultValue();
-            }
-
-            $driver = $reflection->newInstanceArgs($arguments);
+            $driver = $this->resolver->make($name, $parameters);
 
             if (!$driver instanceof LoggerInterface) {
                 throw new InvalidArgumentException("[$name] must be instance of [Psr\Log\LoggerInterface].");
-            }
+        }
 
-            return $driver;
+        return $driver;
 
-        } catch (\ReflectionException $e) {
+        } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
             throw new InvalidArgumentException("Con not create [{$name}].", 0, $e);
         }
