@@ -8,7 +8,7 @@ use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
-class Logger extends AbstractLogger implements LogManagerInterface
+class LogManager extends AbstractLogger implements LogManagerInterface
 {
     /**
      * Configuration.
