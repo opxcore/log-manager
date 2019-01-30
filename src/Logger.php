@@ -11,12 +11,18 @@ use Psr\Log\LoggerInterface;
 class Logger extends AbstractLogger implements LogManagerInterface
 {
     /**
+     * Configuration.
+     *
      * @var array
      */
     protected $config;
 
-
-    protected $resolver;
+    /**
+     * Container for drivers.
+     *
+     * @var \OpxCore\Container\Container
+     */
+    protected $container;
 
     /**
      * Logger constructor.
@@ -27,8 +33,8 @@ class Logger extends AbstractLogger implements LogManagerInterface
      */
     public function __construct($config)
     {
-        $this->resolver = new Container();
         $this->config = $config;
+        $this->container = new Container();
     }
 
     /**
@@ -42,7 +48,7 @@ class Logger extends AbstractLogger implements LogManagerInterface
      */
     public function log($level, $message, array $context = []): void
     {
-        $this->channel()->log($level, $message, $context);
+        $this->driver()->log($level, $message, $context);
     }
 
     /**
@@ -54,15 +60,15 @@ class Logger extends AbstractLogger implements LogManagerInterface
      *
      * @throws  \Psr\Log\InvalidArgumentException
      */
-    public function channel($name = null): LoggerInterface
+    public function driver($name = null): LoggerInterface
     {
-        $channelName = $this->resolveChannelName($name);
+        $driverName = $this->resolveDriverName($name);
 
-        return $this->resolveChannel($channelName);
+        return $this->resolveDriver($driverName);
     }
 
     /**
-     * Resolve channel name to be used.
+     * Resolve driver name to be used.
      *
      * @param  string|null $name
      *
@@ -70,13 +76,13 @@ class Logger extends AbstractLogger implements LogManagerInterface
      *
      * @throws  \Psr\Log\InvalidArgumentException
      */
-    protected function resolveChannelName($name): string
+    protected function resolveDriverName($name): string
     {
         if ($name === null) {
             $name = $this->config['default'] ?? null;
 
             if (!$name) {
-                throw new InvalidArgumentException('Default channel not assigned.');
+                throw new InvalidArgumentException('Default log driver not assigned.');
             }
         }
 
@@ -92,32 +98,36 @@ class Logger extends AbstractLogger implements LogManagerInterface
      *
      * @throws  \Psr\Log\InvalidArgumentException
      */
-    protected function resolveChannel($name): LoggerInterface
+    protected function resolveDriver($name): LoggerInterface
     {
-        if ($this->resolver->has($name)) {
+        if ($this->container->has($name)) {
             try {
-                $driver = $this->resolver->make($name);
+                $driver = $this->container->make($name);
             } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
-                throw new InvalidArgumentException("Con not create [{$name}].", 0, $e);
+                throw new InvalidArgumentException("Con not resolve [{$name}].", 0, $e);
             }
 
             return $driver;
         }
 
-        $config = $this->config['channels'][$name] ?? null;
+        $config = $this->config['drivers'][$name] ?? null;
 
         if (!$config) {
-            throw new InvalidArgumentException("Configuration for channel {$name} not found.");
+            throw new InvalidArgumentException("Configuration for driver [{$name}] not found.");
         }
 
-        $driverClass = $config['driver'];
+        $driverClass = $config['driver'] ?? null;
+
+        if(!$driverClass) {
+            throw new InvalidArgumentException("Driver not set for [{$name}].");
+        }
 
         unset($config['driver']);
 
         $driver = $this->makeDriver($driverClass, $config);
 
-        $this->resolver->instance($name, $driver);
+        $this->container->instance($name, $driver);
 
         return $driver;
     }
@@ -135,7 +145,7 @@ class Logger extends AbstractLogger implements LogManagerInterface
     protected function makeDriver($name, $parameters): LoggerInterface
     {
         try {
-            $driver = $this->resolver->make($name, $parameters);
+            $driver = $this->container->make($name, $parameters);
 
             if (!$driver instanceof LoggerInterface) {
                 throw new InvalidArgumentException("[$name] must be instance of [Psr\Log\LoggerInterface].");
@@ -145,7 +155,7 @@ class Logger extends AbstractLogger implements LogManagerInterface
 
         } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
-            throw new InvalidArgumentException("Con not create [{$name}].", 0, $e);
+            throw new InvalidArgumentException("Con not log create driver for [{$name}].", 0, $e);
         }
     }
 }

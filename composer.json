@@ -1,6 +1,6 @@
 {
-  "name": "opxcore/log",
-  "description": "The OpxCore log.",
+  "name": "opxcore/log-manager",
+  "description": "The OpxCore log manager.",
   "type": "library",
   "keywords": [
     "opxcore",
@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": "^7.1.3",
-    "opxcore/interfaces": "^0.1.7",
+    "opxcore/interfaces": "^0.1.8",
     "opxcore/container": "^0.3"
   },
   "require-dev": {
