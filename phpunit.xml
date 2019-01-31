@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/7.5/phpunit.xsd"
+        bootstrap="vendor/autoload.php"
+        backupGlobals="true"
+        backupStaticAttributes="false"
+        cacheResult="false"
+        cacheTokens="false"
+        colors="false"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        forceCoversAnnotation="false"
+        printerClass="PHPUnit\TextUI\ResultPrinter"
+        processIsolation="false"
+        stopOnError="false"
+        stopOnFailure="false"
+        stopOnIncomplete="false"
+        stopOnSkipped="false"
+        stopOnRisky="false"
+        testSuiteLoaderClass="PHPUnit\Runner\StandardTestSuiteLoader"
+        timeoutForSmallTests="1"
+        timeoutForMediumTests="10"
+        timeoutForLargeTests="60"
+        verbose="true">
+
+    <testsuites>
+        <testsuite name="OpxCore Log manager test suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
+
+    <!--<logging>-->
+    <!--<log type="coverage-html" target="tmp/report" lowUpperBound="35" highLowerBound="70"/>-->
+    <!--<log type="coverage-text" target="php://stdout" showUncoveredFiles="false" showOnlySummary="true"/>-->
+    <!--</logging>-->
+</phpunit>
