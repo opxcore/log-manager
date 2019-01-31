@@ -3,6 +3,7 @@
 namespace OpxCore\Log;
 
 use OpxCore\Container\Container;
+use OpxCore\Log\Exceptions\LogManagerException;
 use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -45,6 +46,9 @@ class LogManager extends AbstractLogger
      * @param  array $context
      *
      * @return void
+     *
+     * @throws  \Psr\Log\InvalidArgumentException
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
     public function log($level, $message, array $context = []): void
     {
@@ -72,7 +76,7 @@ class LogManager extends AbstractLogger
      *
      * @return  \Psr\Log\LoggerInterface
      *
-     * @throws  \Psr\Log\InvalidArgumentException
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
     public function driver($name = null): LoggerInterface
     {
@@ -88,7 +92,7 @@ class LogManager extends AbstractLogger
      *
      * @return  string
      *
-     * @throws  \Psr\Log\InvalidArgumentException
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
     protected function resolveDriverName($name): string
     {
@@ -96,7 +100,7 @@ class LogManager extends AbstractLogger
             $name = $this->config['default'] ?? null;
 
             if (!$name) {
-                throw new InvalidArgumentException('Default log driver not assigned.');
+                throw new LogManagerException('Default log driver not assigned.');
             }
         }
 
@@ -110,16 +114,17 @@ class LogManager extends AbstractLogger
      *
      * @return \Psr\Log\LoggerInterface
      *
-     * @throws  \Psr\Log\InvalidArgumentException
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
     protected function resolveDriver($name): LoggerInterface
     {
         if ($this->container->has($name)) {
             try {
                 $driver = $this->container->make($name);
+
             } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
-                throw new InvalidArgumentException("Con not resolve [{$name}].", 0, $e);
+                throw new InvalidArgumentException("Can not resolve [{$name}].", 0, $e);
             }
 
             return $driver;
@@ -128,13 +133,13 @@ class LogManager extends AbstractLogger
         $config = $this->config['drivers'][$name] ?? null;
 
         if (!$config) {
-            throw new InvalidArgumentException("Configuration for driver [{$name}] not found.");
+            throw new LogManagerException("Configuration for driver [{$name}] not found.");
         }
 
         $driverClass = $config['driver'] ?? null;
 
         if (!$driverClass) {
-            throw new InvalidArgumentException("Driver not set for [{$name}].");
+            throw new LogManagerException("Driver not set for [{$name}].");
         }
 
         unset($config['driver']);
@@ -154,7 +159,7 @@ class LogManager extends AbstractLogger
      *
      * @return  \Psr\Log\LoggerInterface
      *
-     * @throws  \Psr\Log\InvalidArgumentException
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
     protected function makeDriver($name, $parameters): LoggerInterface
     {
@@ -162,14 +167,14 @@ class LogManager extends AbstractLogger
             $driver = $this->container->make($name, $parameters);
 
             if (!$driver instanceof LoggerInterface) {
-                throw new InvalidArgumentException("[$name] must be instance of [Psr\Log\LoggerInterface].");
+                throw new LogManagerException("[$name] must be instance of [Psr\Log\LoggerInterface].");
             }
 
             return $driver;
 
         } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
-            throw new InvalidArgumentException("Con not log create driver for [{$name}].", 0, $e);
+            throw new LogManagerException("Con not log create driver for [{$name}].", 0, $e);
         }
     }
 }
