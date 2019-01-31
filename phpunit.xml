@@ -32,6 +32,9 @@
     </testsuites>
 
     <filter>
+        <blacklist>
+            <directory suffix=".php">src/Exceptions</directory>
+        </blacklist>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
         </whitelist>
