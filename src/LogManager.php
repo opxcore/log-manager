@@ -124,7 +124,7 @@ class LogManager extends AbstractLogger
 
             } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
-                throw new InvalidArgumentException("Can not resolve [{$name}].", 0, $e);
+                throw new LogManagerException("Can not resolve [{$name}].", 0, $e);
             }
 
             return $driver;
