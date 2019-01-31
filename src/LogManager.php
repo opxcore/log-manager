@@ -3,12 +3,12 @@
 namespace OpxCore\Log;
 
 use OpxCore\Container\Container;
-use OpxCore\Interfaces\LogManagerInterface;
 use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
-class LogManager extends AbstractLogger implements LogManagerInterface
+class LogManager extends AbstractLogger
 {
     /**
      * Configuration.
@@ -48,6 +48,20 @@ class LogManager extends AbstractLogger implements LogManagerInterface
      */
     public function log($level, $message, array $context = []): void
     {
+        if (!in_array($level, [
+            LogLevel::EMERGENCY,
+            LogLevel::ALERT,
+            LogLevel::CRITICAL,
+            LogLevel::ERROR,
+            LogLevel::WARNING,
+            LogLevel::NOTICE,
+            LogLevel::INFO,
+            LogLevel::DEBUG,
+        ], true)) {
+
+            throw new InvalidArgumentException("You should not use log level [{$level}]");
+        }
+
         $this->driver()->log($level, $message, $context);
     }
 
@@ -119,7 +133,7 @@ class LogManager extends AbstractLogger implements LogManagerInterface
 
         $driverClass = $config['driver'] ?? null;
 
-        if(!$driverClass) {
+        if (!$driverClass) {
             throw new InvalidArgumentException("Driver not set for [{$name}].");
         }
 
@@ -149,9 +163,9 @@ class LogManager extends AbstractLogger implements LogManagerInterface
 
             if (!$driver instanceof LoggerInterface) {
                 throw new InvalidArgumentException("[$name] must be instance of [Psr\Log\LoggerInterface].");
-        }
+            }
 
-        return $driver;
+            return $driver;
 
         } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
