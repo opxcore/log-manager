@@ -50,15 +50,70 @@ class LogManagerTest extends TestCase
             ],
         ]);
 
-        $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
-
         $driver = $logger->driver();
 
-        $this->assertEquals([[
-            'level' => Psr\Log\LogLevel::DEBUG,
-            'message' => 'Test',
-            'context' => [],
-        ]], $driver->logs);
+        $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->emergency('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::EMERGENCY,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->alert('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::ALERT,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->critical('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::CRITICAL,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->error('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::ERROR,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->warning('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::WARNING,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->notice('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::NOTICE,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->info('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::INFO,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
+
+        $logger->debug('Test');
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+            $driver->logs
+        );
+        $driver->logs = [];
     }
 
     public function test_Wrong_Logger(): void
