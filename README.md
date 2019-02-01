@@ -99,7 +99,7 @@ Logger class:
 namespace \OpxCore\Log;
 
 class LogFile implements \Psr\Log\LoggerInterface
-
+{
     protected $filename;
     
     public function __create($filename)
@@ -108,6 +108,7 @@ class LogFile implements \Psr\Log\LoggerInterface
     }
     
     ...
+}
 ```
 Calling `$manager->driver('file')` at first time will create and return LogFile class 
 instance (for this example is equal to `new \OpxCore\Log\LogFile('/www/project/logs')`) 
