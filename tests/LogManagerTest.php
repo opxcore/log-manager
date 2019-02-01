@@ -6,7 +6,7 @@ class LogManagerTest extends TestCase
 {
     protected $config = [
         'default' => 'testing',
-        'drivers' => [
+        'loggers' => [
             'testing' => [
                 'driver' => TestingLogger::class,
             ],
@@ -30,7 +30,7 @@ class LogManagerTest extends TestCase
 
     public function test_No_Driver(): void
     {
-        $logger = new \OpxCore\Log\LogManager(['default' => 'testing', 'drivers' => []]);
+        $logger = new \OpxCore\Log\LogManager(['default' => 'testing', 'loggers' => []]);
 
         $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
 
@@ -42,7 +42,7 @@ class LogManagerTest extends TestCase
     {
         $logger = new \OpxCore\Log\LogManager([
             'default' => 'testing',
-            'drivers' => [
+            'loggers' => [
                 'testing' => [
                     'driver' => TestingLogger::class,
                     'param' => 'Testing'
@@ -65,7 +65,7 @@ class LogManagerTest extends TestCase
     {
         $logger = new \OpxCore\Log\LogManager([
             'default' => 'testing',
-            'drivers' => [
+            'loggers' => [
                 'testing' => [
                     'driver' => WrongTestingLogger::class,
                     'param' => 'Testing'
@@ -82,7 +82,7 @@ class LogManagerTest extends TestCase
     {
         $logger = new \OpxCore\Log\LogManager([
             'default' => 'testing',
-            'drivers' => [
+            'loggers' => [
                 'testing' => [
                     'driver' => TestingLogger::class,
                 ],
@@ -98,7 +98,7 @@ class LogManagerTest extends TestCase
     {
         $logger = new \OpxCore\Log\LogManager([
             'default' => 'testing',
-            'drivers' => [
+            'loggers' => [
                 'testing' => [
                     'driver' => NotTestingLogger::class,
                 ],
@@ -114,7 +114,7 @@ class LogManagerTest extends TestCase
     {
         $logger = new \OpxCore\Log\LogManager([
             'default' => 'testing',
-            'drivers' => [
+            'loggers' => [
                 'testing' => [
                     'driver' => TestingLogger::class,
                 ],
@@ -130,7 +130,7 @@ class LogManagerTest extends TestCase
     {
         $logger = new \OpxCore\Log\LogManager([
             'default' => 'testing',
-            'drivers' => [
+            'loggers' => [
                 'testing' => [
                     'driver' => '',
                     'param' => 'Testing'
