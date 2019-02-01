@@ -89,7 +89,7 @@ $config = [
             'filename' => '/www/project/logs',
         ],
         'null' => [
-            'driver' => \OpxCore\Log\Channels\LogNull::class,
+            'driver' => \OpxCore\Log\LogNull::class,
         ]
     ],
 ];
