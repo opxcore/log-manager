@@ -23,7 +23,7 @@ use OpxCore\Log\LogManager;
 $manager = new LogManager($config);
 ```
 
-## Creating with container
+## Creating with [container](https://github.com/opxcore/container)
 ```php
 use OpxCore\Interfaces\LoggerInterface;
 use OpxCore\Log\LogManager;
@@ -50,9 +50,9 @@ logger to be used as default logger. `'loggers'` is a set of loggers to be used
 keyed by name. Required parameter of each logger is a `'driver'` containing class
 name of logger to be used with corresponding name.
 
-Loggers will be resolved by [container](https://github.com/opxcore/container) assigned 
-to log manager on demand and instanced for future use. All parameters except `'driver'` 
-will be passed to logger constructor as parameters. 
+Loggers will be resolved by [container](https://github.com/opxcore/container) on 
+demand and instanced for future use. All parameters except `'driver'` will be 
+passed to logger constructor as parameters. 
   
 To get a log driver call method 
 ```php
@@ -110,6 +110,20 @@ class LogFile implements \Psr\Log\LoggerInterface
     ...
 ```
 Calling `$manager->driver('file')` at first time will create and return LogFile class 
-instance (for this example is equal `new \OpxCore\Log\LogFile('/www/project/logs')`) 
+instance (for this example is equal to `new \OpxCore\Log\LogFile('/www/project/logs')`) 
 and store it's instance for future use. So calling `$manager->driver('file')` for 
 second time will return same instance of logger.
+
+For this example using
+```php
+$manager->driver('file')->debug('Some message');
+```
+is equal to (as `'file'` set as default driver)
+```php
+$manager->driver()->debug('Some message');
+```
+and equal to
+```php
+$manager->debug('Some message');
+```
+
