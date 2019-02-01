@@ -4,12 +4,11 @@ namespace OpxCore\Log;
 
 use OpxCore\Container\Container;
 use OpxCore\Log\Exceptions\LogManagerException;
-use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
-class LogManager extends AbstractLogger
+class LogManager implements LoggerInterface
 {
     /**
      * Configuration.
@@ -36,6 +35,137 @@ class LogManager extends AbstractLogger
     {
         $this->config = $config;
         $this->container = new Container();
+    }
+
+    /**
+     * System is unusable.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function emergency($message, array $context = []): void
+    {
+        $this->driver()->emergency($message, $context);
+    }
+
+    /**
+     * Action must be taken immediately.
+     *
+     * Example: Entire website down, database unavailable, etc. This should
+     * trigger the SMS alerts and wake you up.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function alert($message, array $context = []): void
+    {
+        $this->driver()->alert($message, $context);
+    }
+
+    /**
+     * Critical conditions.
+     *
+     * Example: Application component unavailable, unexpected exception.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function critical($message, array $context = []): void
+    {
+        $this->driver()->critical($message, $context);
+    }
+
+    /**
+     * Runtime errors that do not require immediate action but should typically
+     * be logged and monitored.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function error($message, array $context = []): void
+    {
+        $this->driver()->error($message, $context);
+    }
+
+    /**
+     * Exceptional occurrences that are not errors.
+     *
+     * Example: Use of deprecated APIs, poor use of an API, undesirable things
+     * that are not necessarily wrong.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function warning($message, array $context = []): void
+    {
+        $this->driver()->warning($message, $context);
+    }
+
+    /**
+     * Normal but significant events.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function notice($message, array $context = []): void
+    {
+        $this->driver()->notice($message, $context);
+    }
+
+    /**
+     * Interesting events.
+     *
+     * Example: User logs in, SQL logs.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function info($message, array $context = []): void
+    {
+        $this->driver()->info($message, $context);
+    }
+
+    /**
+     * Detailed debug information.
+     *
+     * @param  string $message
+     * @param  array $context
+     *
+     * @return  void
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function debug($message, array $context = []): void
+    {
+        $this->driver()->debug($message, $context);
     }
 
     /**
@@ -130,7 +260,7 @@ class LogManager extends AbstractLogger
             return $driver;
         }
 
-        $config = $this->config['drivers'][$name] ?? null;
+        $config = $this->config['loggers'][$name] ?? null;
 
         if (!$config) {
             throw new LogManagerException("Configuration for driver [{$name}] not found.");
