@@ -48,7 +48,7 @@ Where $config is configuration for log manager (see below).
 Configuration array consists of two keys. Value of `'default'` must contain name 
 of logger to be used as default logger. `'loggers'` is a set of loggers to be used
 keyed by name. Required parameter of each logger is a `'driver'` containing class
-name of logger to be used with corresponding name.
+name of logger to be used with corresponding name (See examples below).
 
 Log manager extends [container](https://github.com/opxcore/container), so loggers
 will be resolved by it with all dependency injections. All loggers will be resolved 
