@@ -53,11 +53,11 @@ class LogManagerTest extends TestCase
         $driver1 = new TestingLogger('testing 1');
         $driver2 = new TestingLogger('testing 2');
 
-        $logger->registerLogger('testing', function () use ($driver1) {
+        $logger->bind('testing', function () use ($driver1) {
             return $driver1;
         });
 
-        $logger->registerLogger('testing2', function () use ($driver2) {
+        $logger->bind('testing2', function () use ($driver2) {
             return $driver2;
         });
 

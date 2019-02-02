@@ -58,7 +58,7 @@ passed to logger constructor as parameters.
 
 Additionally you can bind custom created logger:
 ```php
-$manager->registerLogger('custom_logger', function() {
+$manager->bind('custom_logger', function() {
     return new Logger(...);
 });
 ```

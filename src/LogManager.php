@@ -176,19 +176,6 @@ class LogManager extends Container implements LoggerInterface
     }
 
     /**
-     * Bind log driver resolver closure.
-     *
-     * @param  string $name
-     * @param  \Closure $closure
-     *
-     * @return  void
-     */
-    public function registerLogger($name, \Closure $closure):void
-    {
-        $this->bind($name, $closure);
-    }
-
-    /**
      * Get logger assigned with channel name.
      *
      * @param  string|array|null $names
