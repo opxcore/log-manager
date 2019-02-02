@@ -44,23 +44,36 @@ $manager = $container->make(LoggerInterface::class, ['config' => $config]);
 ```
 Where $config is configuration for log manager (see below).
 
-## Configuring and usage
-Configuration consists of two keys. Value of `'default'` must contain name of
-logger to be used as default logger. `'loggers'` is a set of loggers to be used
+## Configuring and using
+Configuration array consists of two keys. Value of `'default'` must contain name 
+of logger to be used as default logger. `'loggers'` is a set of loggers to be used
 keyed by name. Required parameter of each logger is a `'driver'` containing class
 name of logger to be used with corresponding name.
 
-Loggers will be resolved by [container](https://github.com/opxcore/container) on 
-demand and instanced for future use. All parameters except `'driver'` will be 
+Log manager extends [container](https://github.com/opxcore/container), so loggers
+will be resolved by it with all dependency injections. All loggers will be resolved 
+on demand and instanced for future use. All parameters except `'driver'` will be 
 passed to logger constructor as parameters. 
+
+Additionally you can bind custom created logger:
+```php
+$manager->registerLogger('custom_logger', function() {
+    return new Logger(...);
+});
+```
   
 To get a log driver call method 
-```php
-$manager->driver($name);
-```
-where `$name` is name of logger to be returned. If `null` given driver set as default
-will be used.
+`$manager->driver($name)` where `$name` is name of logger to be returned. If `null` 
+given driver set as default will be used.
 
+To get multiple log drivers use same method with array of names 
+`$manager->driver([$name1, $name2])`
+
+In both cases `LoggerProxy` class with chosen loggers bindings will be returned,
+so `$manager->driver([$name1, $name2])->log($message)` will call log action on
+each of logger.
+
+## PSR-3
 Log manager implements PSR-3. So available methods are:
 ```php
 $manager->emergency($message, $context);
@@ -74,9 +87,6 @@ $manager->debug($message, $context);
 $manager->log($level, $message, $context);
 ```
 These methods will call corresponding method of log driver set as default.
-
-`$level` in `$manager->log()` must be one of `'emergency'`, `'alert'`, `'critical'`,
-`'error'`, `'warning'`, `'notice'`, `'info'`, `'debug'`.
 
 ## Examples
 Log manager configuration:
