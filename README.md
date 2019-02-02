@@ -49,7 +49,8 @@ Configuration array consists of two keys. Value of `'default'` must contain name
 (or array of names) of logger to be used as default logger. `'loggers'` is a set 
 of loggers to be used keyed by name. Required parameter of each logger is a 
 `'driver'` containing class name of logger to be used with corresponding name 
-(See examples below).
+(See examples below). Third additional key `'groups'` contain array of driver
+groups keyed by name.
 
 Log manager extends [container](https://github.com/opxcore/container), so loggers
 will be resolved by it with all dependency injections. All loggers will be resolved 
@@ -73,6 +74,8 @@ To get multiple log drivers use same method with array of names
 In both cases `LoggerProxy` class with chosen loggers bindings will be returned,
 so `$manager->driver([$name1, $name2])->log($message)` will call log action on
 each of logger.
+
+To use group logging use `$manager->group($name)` or `$manager->group([$name1, $name2])`.
 
 ## PSR-3
 Log manager implements PSR-3. So available methods are:
@@ -104,6 +107,10 @@ $config = [
         'null' => [
             'driver' => \OpxCore\Log\LogNull::class,
         ]
+    ],
+    'groups' => [
+        'local' => ['file', 'null'],
+        'network' => ['email'],
     ],
 ];
 ```

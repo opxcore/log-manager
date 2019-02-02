@@ -194,6 +194,30 @@ class LogManager extends Container implements LoggerInterface
     }
 
     /**
+     * Resolve a group of loggers.
+     *
+     * @param  string|array $names
+     *
+     * @return  \Psr\Log\LoggerInterface
+     *
+     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     */
+    public function group($names): LoggerInterface
+    {
+        $drivers = [[]];
+
+        foreach ((array)$names as $name) {
+            if (!isset($this->config['groups'][$name])) {
+                throw new LogManagerException("Group {$name} not found");
+            }
+
+            $drivers[] = $this->config['groups'][$name];
+        }
+
+        return $this->driver(array_merge(...$drivers));
+    }
+
+    /**
      * Detect if default driver has to be used. Additionally convert string to
      * array if single driver given.
      *

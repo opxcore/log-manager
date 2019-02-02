@@ -136,6 +136,63 @@ class LogManagerTest extends TestCase
         );
     }
 
+    public function test_No_Group():void
+    {
+        $logger = new \OpxCore\Log\LogManager([
+            'default' => 'testing',
+            'groups' => [
+                'local' => ['testing1', 'testing2'],
+            ],
+        ]);
+
+        $driver1 = new TestingLogger('testing 1');
+        $driver2 = new TestingLogger('testing 2');
+
+        $logger->bind('testing1', function () use ($driver1) {
+            return $driver1;
+        });
+
+        $logger->bind('testing2', function () use ($driver2) {
+            return $driver2;
+        });
+
+        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+
+        $logger->group('nogroup')->debug('Test');
+    }
+
+    public function test_Group():void
+    {
+        $logger = new \OpxCore\Log\LogManager([
+            'default' => 'testing',
+            'groups' => [
+                'local' => ['testing1', 'testing2'],
+            ],
+        ]);
+
+        $driver1 = new TestingLogger('testing 1');
+        $driver2 = new TestingLogger('testing 2');
+
+        $logger->bind('testing1', function () use ($driver1) {
+            return $driver1;
+        });
+
+        $logger->bind('testing2', function () use ($driver2) {
+            return $driver2;
+        });
+
+        $logger->group('local')->debug('Test');
+
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+            $driver1->logs
+        );
+        $this->assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+            $driver2->logs
+        );
+    }
+
     public function test_Wrong_Logger(): void
     {
         $logger = new \OpxCore\Log\LogManager([
