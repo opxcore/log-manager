@@ -4,11 +4,9 @@ namespace OpxCore\Log;
 
 use OpxCore\Container\Container;
 use OpxCore\Log\Exceptions\LogManagerException;
-use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 
-class LogManager implements LoggerInterface
+class LogManager extends Container implements LoggerInterface
 {
     /**
      * Configuration.
@@ -16,13 +14,6 @@ class LogManager implements LoggerInterface
      * @var array
      */
     protected $config;
-
-    /**
-     * Container for drivers.
-     *
-     * @var \OpxCore\Container\Container
-     */
-    protected $container;
 
     /**
      * Logger constructor.
@@ -34,7 +25,6 @@ class LogManager implements LoggerInterface
     public function __construct($config)
     {
         $this->config = $config;
-        $this->container = new Container();
     }
 
     /**
@@ -182,59 +172,82 @@ class LogManager implements LoggerInterface
      */
     public function log($level, $message, array $context = []): void
     {
-        if (!in_array($level, [
-            LogLevel::EMERGENCY,
-            LogLevel::ALERT,
-            LogLevel::CRITICAL,
-            LogLevel::ERROR,
-            LogLevel::WARNING,
-            LogLevel::NOTICE,
-            LogLevel::INFO,
-            LogLevel::DEBUG,
-        ], true)) {
-
-            throw new InvalidArgumentException("You should not use log level [{$level}]");
-        }
-
         $this->driver()->log($level, $message, $context);
+    }
+
+    /**
+     * Bind log driver resolver closure.
+     *
+     * @param  string $name
+     * @param  \Closure $closure
+     *
+     * @return  void
+     */
+    public function registerLogger($name, \Closure $closure):void
+    {
+        $this->bind($name, $closure);
     }
 
     /**
      * Get logger assigned with channel name.
      *
-     * @param  string|null $name
+     * @param  string|array|null $names
      *
      * @return  \Psr\Log\LoggerInterface
      *
      * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
-    public function driver($name = null): LoggerInterface
+    public function driver($names = null): LoggerInterface
     {
-        $driverName = $this->resolveDriverName($name);
+        $driverNames = $this->resolveDriverNames($names);
 
-        return $this->resolveDriver($driverName);
+        $drivers = $this->resolveDrivers($driverNames);
+
+        return new LoggerProxy($drivers);
     }
 
     /**
-     * Resolve driver name to be used.
+     * Detect if default driver has to be used. Additionally convert string to
+     * array if single driver given.
      *
-     * @param  string|null $name
+     * @param  string|array|null $names
      *
-     * @return  string
+     * @return  array
      *
      * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
-    protected function resolveDriverName($name): string
+    protected function resolveDriverNames($names): array
     {
-        if ($name === null) {
-            $name = $this->config['default'] ?? null;
+        if ($names === null) {
+            $names = $this->config['default'] ?? null;
 
-            if (!$name) {
+            if (!$names) {
                 throw new LogManagerException('Default log driver not assigned.');
             }
         }
 
-        return $name;
+        return (array)$names;
+    }
+
+    /**
+     * Resolve all given names for corresponding drivers.
+     *
+     * @param  array $names
+     *
+     * @return  array
+     *
+     * @throws \OpxCore\Log\Exceptions\LogManagerException
+     */
+    protected function resolveDrivers($names): array
+    {
+        $resolved = [];
+
+        foreach ($names as $name) {
+
+            $resolved[] = $this->resolveSingleDriver($name);
+        }
+
+        return $resolved;
     }
 
     /**
@@ -246,11 +259,11 @@ class LogManager implements LoggerInterface
      *
      * @throws  \OpxCore\Log\Exceptions\LogManagerException
      */
-    protected function resolveDriver($name): LoggerInterface
+    protected function resolveSingleDriver($name): LoggerInterface
     {
-        if ($this->container->has($name)) {
+        if ($this->has($name)) {
             try {
-                $driver = $this->container->make($name);
+                $driver = $this->make($name);
 
             } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
 
@@ -276,7 +289,7 @@ class LogManager implements LoggerInterface
 
         $driver = $this->makeDriver($driverClass, $config);
 
-        $this->container->instance($name, $driver);
+        $this->instance($name, $driver);
 
         return $driver;
     }
@@ -294,7 +307,7 @@ class LogManager implements LoggerInterface
     protected function makeDriver($name, $parameters): LoggerInterface
     {
         try {
-            $driver = $this->container->make($name, $parameters);
+            $driver = $this->make($name, $parameters);
 
             if (!$driver instanceof LoggerInterface) {
                 throw new LogManagerException("[$name] must be instance of [Psr\Log\LoggerInterface].");
