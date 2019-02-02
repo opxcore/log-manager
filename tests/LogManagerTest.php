@@ -50,7 +50,11 @@ class LogManagerTest extends TestCase
             ],
         ]);
 
-        $driver = $logger->driver();
+        $driver = new TestingLogger('testing');
+
+        $logger->registerLogger('testing', function () use ($driver) {
+            return $driver;
+        });
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
         $this->assertEquals(
