@@ -46,9 +46,10 @@ Where $config is configuration for log manager (see below).
 
 ## Configuring and using
 Configuration array consists of two keys. Value of `'default'` must contain name 
-of logger to be used as default logger. `'loggers'` is a set of loggers to be used
-keyed by name. Required parameter of each logger is a `'driver'` containing class
-name of logger to be used with corresponding name (See examples below).
+(or array of names) of logger to be used as default logger. `'loggers'` is a set 
+of loggers to be used keyed by name. Required parameter of each logger is a 
+`'driver'` containing class name of logger to be used with corresponding name 
+(See examples below).
 
 Log manager extends [container](https://github.com/opxcore/container), so loggers
 will be resolved by it with all dependency injections. All loggers will be resolved 
@@ -93,6 +94,8 @@ Log manager configuration:
 ```php
 $config = [
     'default' => 'file',    
+    // Also you can use
+    // 'default' => ['file', 'null'],    
     'loggers' => [
         'file' => [
             'driver' => \OpxCore\Log\LogFile::class,
