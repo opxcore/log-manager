@@ -1,9 +1,20 @@
 <?php
+/*
+ * This file is part of the OpxCore.
+ *
+ * Copyright (c) Lozovoy Vyacheslav <opxcore@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace OpxCore\Log;
 
 use OpxCore\Container\Container;
+use OpxCore\Container\Exceptions\ContainerException;
+use OpxCore\Container\Exceptions\NotFoundException;
 use OpxCore\Log\Exceptions\LogManagerException;
+use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
 class LogManager extends Container implements LoggerInterface
@@ -13,16 +24,15 @@ class LogManager extends Container implements LoggerInterface
      *
      * @var array
      */
-    protected $config;
+    protected array $config;
 
     /**
      * Logger constructor.
      *
-     * @param  array $config
+     * @param array $config
      *
-     * @return  void
      */
-    public function __construct($config)
+    public function __construct(array $config)
     {
         $this->config = $config;
     }
@@ -30,12 +40,12 @@ class LogManager extends Container implements LoggerInterface
     /**
      * System is unusable.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function emergency($message, array $context = []): void
     {
@@ -48,12 +58,12 @@ class LogManager extends Container implements LoggerInterface
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function alert($message, array $context = []): void
     {
@@ -65,12 +75,12 @@ class LogManager extends Container implements LoggerInterface
      *
      * Example: Application component unavailable, unexpected exception.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function critical($message, array $context = []): void
     {
@@ -81,12 +91,12 @@ class LogManager extends Container implements LoggerInterface
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function error($message, array $context = []): void
     {
@@ -99,12 +109,12 @@ class LogManager extends Container implements LoggerInterface
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function warning($message, array $context = []): void
     {
@@ -114,12 +124,12 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Normal but significant events.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function notice($message, array $context = []): void
     {
@@ -131,12 +141,12 @@ class LogManager extends Container implements LoggerInterface
      *
      * Example: User logs in, SQL logs.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function info($message, array $context = []): void
     {
@@ -146,12 +156,12 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Detailed debug information.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function debug($message, array $context = []): void
     {
@@ -161,14 +171,14 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Logs with a default driver.
      *
-     * @param  mixed $level
-     * @param  string $message
-     * @param  array $context
+     * @param mixed $level
+     * @param $message
+     * @param array $context
      *
      * @return void
      *
-     * @throws  \Psr\Log\InvalidArgumentException
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  InvalidArgumentException
+     * @throws  LogManagerException
      */
     public function log($level, $message, array $context = []): void
     {
@@ -178,11 +188,11 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Get logger assigned with channel name.
      *
-     * @param  string|array|null $names
+     * @param string|array|null $names
      *
-     * @return  \Psr\Log\LoggerInterface
+     * @return  LoggerInterface
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function driver($names = null): LoggerInterface
     {
@@ -196,11 +206,11 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Resolve a group of loggers.
      *
-     * @param  string|array $names
+     * @param string|array $names
      *
-     * @return  \Psr\Log\LoggerInterface
+     * @return  LoggerInterface
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     public function group($names): LoggerInterface
     {
@@ -214,18 +224,18 @@ class LogManager extends Container implements LoggerInterface
             $drivers[] = $this->config['groups'][$name];
         }
 
-        return $this->driver(array_merge(...$drivers));
+        return $this->driver(array_unique(array_merge(...$drivers)));
     }
 
     /**
      * Detect if default driver has to be used. Additionally convert string to
      * array if single driver given.
      *
-     * @param  string|array|null $names
+     * @param string|array|null $names
      *
      * @return  array
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws  LogManagerException
      */
     protected function resolveDriverNames($names): array
     {
@@ -243,13 +253,13 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Resolve all given names for corresponding drivers.
      *
-     * @param  array $names
+     * @param array $names
      *
      * @return  array
      *
-     * @throws \OpxCore\Log\Exceptions\LogManagerException
+     * @throws LogManagerException
      */
-    protected function resolveDrivers($names): array
+    protected function resolveDrivers(array $names): array
     {
         $resolved = [];
 
@@ -264,21 +274,21 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Get or create driver instance.
      *
-     * @param  string $name
+     * @param string $name
      *
-     * @return \Psr\Log\LoggerInterface
+     * @return LoggerInterface
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws LogManagerException
      */
-    protected function resolveSingleDriver($name): LoggerInterface
+    protected function resolveSingleDriver(string $name): LoggerInterface
     {
         if ($this->has($name)) {
             try {
                 $driver = $this->make($name);
 
-            } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
+            } catch (ContainerException | NotFoundException $e) {
 
-                throw new LogManagerException("Can not resolve [{$name}].", 0, $e);
+                throw new LogManagerException("Can not resolve [{$name}]: {$e->getMessage()}.", 0, $e);
             }
 
             return $driver;
@@ -308,14 +318,14 @@ class LogManager extends Container implements LoggerInterface
     /**
      * Build driver instance.
      *
-     * @param  string $name
-     * @param  array $parameters
+     * @param string $name
+     * @param array $parameters
      *
-     * @return  \Psr\Log\LoggerInterface
+     * @return  LoggerInterface
      *
-     * @throws  \OpxCore\Log\Exceptions\LogManagerException
+     * @throws LogManagerException
      */
-    protected function makeDriver($name, $parameters): LoggerInterface
+    protected function makeDriver(string $name, array $parameters): LoggerInterface
     {
         try {
             $driver = $this->make($name, $parameters);
@@ -326,9 +336,9 @@ class LogManager extends Container implements LoggerInterface
 
             return $driver;
 
-        } catch (\OpxCore\Container\Exceptions\ContainerException|\OpxCore\Container\Exceptions\NotFoundException $e) {
+        } catch (ContainerException | NotFoundException $e) {
 
-            throw new LogManagerException("Con not log create driver for [{$name}].", 0, $e);
+            throw new LogManagerException("Con not log create driver for [{$name}]: {$e->getMessage()}", 0, $e);
         }
     }
 }
