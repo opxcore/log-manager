@@ -1,10 +1,12 @@
 <?php
 
+use OpxCore\Log\Exceptions\LogManagerException;
+use OpxCore\Log\LogManager;
 use PHPUnit\Framework\TestCase;
 
 class LogManagerTest extends TestCase
 {
-    protected $config = [
+    protected array $config = [
         'default' => 'testing',
         'loggers' => [
             'testing' => [
@@ -13,34 +15,34 @@ class LogManagerTest extends TestCase
         ],
     ];
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         require __DIR__ . '/TestingLogger.php';
         require __DIR__ . '/WrongTestingLogger.php';
     }
 
-    public function test_No_Config(): void
+    public function testNoConfig(): void
     {
-        $logger = new \OpxCore\Log\LogManager([]);
+        $logger = new LogManager([]);
 
-        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+        $this->expectException(LogManagerException::class);
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
     }
 
-    public function test_No_Driver(): void
+    public function testNoDriver(): void
     {
-        $logger = new \OpxCore\Log\LogManager(['default' => 'testing', 'loggers' => []]);
+        $logger = new LogManager(['default' => 'testing', 'loggers' => []]);
 
-        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+        $this->expectException(LogManagerException::class);
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
 
     }
 
-    public function test_Normal(): void
+    public function testNormal(): void
     {
-        $logger = new \OpxCore\Log\LogManager([
+        $logger = new LogManager([
             'default' => 'testing',
             'loggers' => [
                 'testing1' => [
@@ -62,83 +64,83 @@ class LogManagerTest extends TestCase
         });
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->emergency('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::EMERGENCY,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::EMERGENCY, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->alert('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::ALERT,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::ALERT, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->critical('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::CRITICAL,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::CRITICAL, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->error('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::ERROR,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::ERROR, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->warning('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::WARNING,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::WARNING, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->notice('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::NOTICE,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::NOTICE, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->info('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::INFO,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::INFO, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
 
         $logger->debug('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
         $driver1->logs = [];
         $driver2->logs = [];
 
-        $logger->driver(['testing1','testing2','testing'])->debug('Test');
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+        $logger->driver(['testing1', 'testing2', 'testing'])->debug('Test');
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG, 'message' => 'Test', 'context' => []]],
             $driver2->logs
         );
     }
 
-    public function test_No_Group():void
+    public function testNoGroup(): void
     {
-        $logger = new \OpxCore\Log\LogManager([
+        $logger = new LogManager([
             'default' => 'testing',
             'groups' => [
                 'local' => ['testing1', 'testing2'],
@@ -156,14 +158,14 @@ class LogManagerTest extends TestCase
             return $driver2;
         });
 
-        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+        $this->expectException(LogManagerException::class);
 
         $logger->group('nogroup')->debug('Test');
     }
 
-    public function test_Group():void
+    public function testGroup(): void
     {
-        $logger = new \OpxCore\Log\LogManager([
+        $logger = new LogManager([
             'default' => 'testing',
             'groups' => [
                 'local' => ['testing1', 'testing2'],
@@ -183,19 +185,19 @@ class LogManagerTest extends TestCase
 
         $logger->group('local')->debug('Test');
 
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG, 'message' => 'Test', 'context' => []]],
             $driver1->logs
         );
-        $this->assertEquals(
-            [['level' => Psr\Log\LogLevel::DEBUG,'message' => 'Test', 'context' => []]],
+        self::assertEquals(
+            [['level' => Psr\Log\LogLevel::DEBUG, 'message' => 'Test', 'context' => []]],
             $driver2->logs
         );
     }
 
-    public function test_Wrong_Logger(): void
+    public function testWrongLogger(): void
     {
-        $logger = new \OpxCore\Log\LogManager([
+        $logger = new LogManager([
             'default' => 'testing',
             'loggers' => [
                 'testing' => [
@@ -205,30 +207,42 @@ class LogManagerTest extends TestCase
             ],
         ]);
 
-        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+        $this->expectException(LogManagerException::class);
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
     }
 
-    public function test_Driver_Not_Found(): void
+    public function testMakeException(): void
     {
-        $logger = new \OpxCore\Log\LogManager([
+        $logger = new LogManager([]);
+        $logger->bind('test', function () {
+            return new WrongTestingLogger;
+        });
+
+        $this->expectException(LogManagerException::class);
+
+        $logger->driver('test')->log(Psr\Log\LogLevel::DEBUG, 'Test');
+    }
+
+    public function testDriverNotFound(): void
+    {
+        $logger = new LogManager([
             'default' => 'testing',
             'loggers' => [
                 'testing' => [
-                    'driver' => NotTestingLogger::class,
+                    'driver' => 'NotTestingLogger',
                 ],
             ],
         ]);
 
-        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+        $this->expectException(LogManagerException::class);
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
     }
 
-    public function test_Driver_No_Param(): void
+    public function testDriverNoParam(): void
     {
-        $logger = new \OpxCore\Log\LogManager([
+        $logger = new LogManager([
             'default' => 'testing',
             'loggers' => [
                 'testing' => [
@@ -237,14 +251,14 @@ class LogManagerTest extends TestCase
             ],
         ]);
 
-        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+        $this->expectException(LogManagerException::class);
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
     }
 
-    public function test_No_Driver_Class(): void
+    public function testNoDriverClass(): void
     {
-        $logger = new \OpxCore\Log\LogManager([
+        $logger = new LogManager([
             'default' => 'testing',
             'loggers' => [
                 'testing' => [
@@ -254,7 +268,7 @@ class LogManagerTest extends TestCase
             ],
         ]);
 
-        $this->expectException(\OpxCore\Log\Exceptions\LogManagerException::class);
+        $this->expectException(LogManagerException::class);
 
         $logger->log(Psr\Log\LogLevel::DEBUG, 'Test');
     }
