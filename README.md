@@ -1,6 +1,6 @@
 # Log manager
 
-[![Build Status](https://travis-ci.org/opxcore/log-manager.svg?branch=master)](https://travis-ci.org/opxcore/log-manager)
+[![Build Status](https://travis-ci.com/opxcore/log-manager.svg?branch=master)](https://travis-ci.com/opxcore/log-manager)
 [![Coverage Status](https://coveralls.io/repos/github/opxcore/log-manager/badge.svg?branch=master)](https://coveralls.io/github/opxcore/log-manager?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/opxcore/log-manager/v/stable)](https://packagist.org/packages/opxcore/log-manager)
 [![Total Downloads](https://poser.pugx.org/opxcore/log-manager/downloads)](https://packagist.org/packages/opxcore/log-manager)
