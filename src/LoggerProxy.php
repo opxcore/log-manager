@@ -1,9 +1,16 @@
 <?php
+/*
+ * This file is part of the OpxCore.
+ *
+ * Copyright (c) Lozovoy Vyacheslav <opxcore@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace OpxCore\Log;
 
-
-use Psr\Log\LoggerInterface;
+use OpxCore\Log\Interfaces\LoggerInterface;
 
 class LoggerProxy implements LoggerInterface
 {
@@ -12,7 +19,7 @@ class LoggerProxy implements LoggerInterface
     /**
      * LoggerProxy constructor.
      *
-     * @param  LoggerInterface|array $loggers
+     * @param LoggerInterface|array $loggers
      *
      * @return  void
      */
@@ -24,8 +31,8 @@ class LoggerProxy implements LoggerInterface
     /**
      * System is unusable.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -40,8 +47,8 @@ class LoggerProxy implements LoggerInterface
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -55,8 +62,8 @@ class LoggerProxy implements LoggerInterface
      *
      * Example: Application component unavailable, unexpected exception.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -69,8 +76,8 @@ class LoggerProxy implements LoggerInterface
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -85,8 +92,8 @@ class LoggerProxy implements LoggerInterface
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -98,8 +105,8 @@ class LoggerProxy implements LoggerInterface
     /**
      * Normal but significant events.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -113,8 +120,8 @@ class LoggerProxy implements LoggerInterface
      *
      * Example: User logs in, SQL logs.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -126,8 +133,8 @@ class LoggerProxy implements LoggerInterface
     /**
      * Detailed debug information.
      *
-     * @param  string $message
-     * @param  array $context
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -139,9 +146,9 @@ class LoggerProxy implements LoggerInterface
     /**
      * Logs with a default driver.
      *
-     * @param  mixed $level
-     * @param  string $message
-     * @param  array $context
+     * @param mixed $level
+     * @param $message
+     * @param array $context
      *
      * @return  void
      */
@@ -153,15 +160,15 @@ class LoggerProxy implements LoggerInterface
     /**
      * Call log action for each registered logger.
      *
-     * @param  string $method
-     * @param  mixed ...$parameters
+     * @param  $method
+     * @param mixed ...$parameters
      *
      * @return  void
      */
     protected function callAction($method, ...$parameters): void
     {
         /** @var \Psr\Log\LoggerInterface $logger */
-        foreach((array)$this->loggers as $logger) {
+        foreach ((array)$this->loggers as $logger) {
 
             $logger->$method(...$parameters);
         }
