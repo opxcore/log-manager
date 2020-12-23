@@ -1,10 +1,12 @@
 <?php
 
-class TestingLogger extends \Psr\Log\AbstractLogger
-{
-    public $logs = [];
+use Psr\Log\AbstractLogger;
 
-    public $param;
+class TestingLogger extends AbstractLogger
+{
+    public array $logs = [];
+
+    public string $param;
 
     public function __construct($param)
     {
@@ -15,7 +17,7 @@ class TestingLogger extends \Psr\Log\AbstractLogger
      * Logs with an arbitrary level.
      *
      * @param mixed  $level
-     * @param string $message
+     * @param $message
      * @param array  $context
      *
      * @return void

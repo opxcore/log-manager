@@ -2,9 +2,9 @@
 
 class WrongTestingLogger
 {
-    public $logs = [];
+    public array $logs = [];
 
-    public $param;
+    public string $param;
 
     public function __construct($param)
     {
@@ -15,7 +15,7 @@ class WrongTestingLogger
      * Logs with an arbitrary level.
      *
      * @param mixed  $level
-     * @param string $message
+     * @param $message
      * @param array  $context
      *
      * @return void
