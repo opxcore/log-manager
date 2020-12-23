@@ -1,24 +1,18 @@
-sudo: false
-
 language: php
 
 matrix:
   include:
-    - php: 7.1
-    - php: 7.2
-      env: ANALYZE=true
-    - php: 7.3
-
+    - php: 7.4
+env:
+  global:
+    - XDEBUG_MODE: coverage,debug
 install:
   - travis_retry composer self-update
-  - travis_retry composer update --no-interaction --dev
-
-before_script:
-  - if [[ $ANALYZE == 'true' ]]; then travis_retry composer require php-coveralls/php-coveralls:^1.0 ; fi;
+  - travis_retry composer update --no-interaction
+  - travis_retry composer require --dev php-coveralls/php-coveralls
 
 script:
-  - if [[ $ANALYZE == 'true' ]]; then vendor/bin/phpunit --coverage-clover build/logs/clover.xml ; fi;
-  - if [[ $ANALYZE != 'true' ]]; then vendor/bin/phpunit ; fi;
+  - vendor/bin/phpunit -c phpunit.xml --coverage-clover build/logs/clover.xml
 
 after_success:
-  - if [[ $ANALYZE == 'true' ]]; then php vendor/bin/coveralls -v ; fi
+  - travis_retry php vendor/bin/php-coveralls -v
