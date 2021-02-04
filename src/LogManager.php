@@ -19,22 +19,29 @@ use Psr\Log\LoggerInterface;
 
 class LogManager extends Container implements LoggerInterface
 {
-    /**
-     * Configuration.
-     *
-     * @var array
-     */
-    protected array $config;
+    /** @var string|array Default log driver(s) */
+    protected $default;
+
+    /** @var array Loggers definitions */
+    protected array $loggers;
+
+    /** @var array|null Groups of loggers */
+    protected ?array $groups;
 
     /**
      * Logger constructor.
      *
-     * @param array $config
+     * @param string|array $default
+     * @param array $loggers
+     * @param array|null $groups
      *
+     * @return  void
      */
-    public function __construct(array $config)
+    public function __construct($default, array $loggers, ?array $groups = null)
     {
-        $this->config = $config;
+        $this->default = $default;
+        $this->loggers = $loggers;
+        $this->groups = $groups;
     }
 
     /**
@@ -217,11 +224,11 @@ class LogManager extends Container implements LoggerInterface
         $drivers = [[]];
 
         foreach ((array)$names as $name) {
-            if (!isset($this->config['groups'][$name])) {
+            if (!isset($this->groups[$name])) {
                 throw new LogManagerException("Group {$name} not found");
             }
 
-            $drivers[] = $this->config['groups'][$name];
+            $drivers[] = $this->groups[$name];
         }
 
         return $this->driver(array_unique(array_merge(...$drivers)));
@@ -240,7 +247,7 @@ class LogManager extends Container implements LoggerInterface
     protected function resolveDriverNames($names): array
     {
         if ($names === null) {
-            $names = $this->config['default'] ?? null;
+            $names = $this->default ?? null;
 
             if (!$names) {
                 throw new LogManagerException('Default log driver not assigned.');
@@ -291,10 +298,14 @@ class LogManager extends Container implements LoggerInterface
                 throw new LogManagerException("Can not resolve [{$name}]: {$e->getMessage()}.", 0, $e);
             }
 
+            if (!($driver instanceof LoggerInterface)) {
+                throw new LogManagerException("[{$name}] must implement interface Psr\Log\LoggerInterface");
+            }
+
             return $driver;
         }
 
-        $config = $this->config['loggers'][$name] ?? null;
+        $config = $this->loggers[$name] ?? null;
 
         if (!$config) {
             throw new LogManagerException("Configuration for driver [{$name}] not found.");

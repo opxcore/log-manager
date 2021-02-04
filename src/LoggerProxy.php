@@ -14,12 +14,13 @@ use OpxCore\Log\Interfaces\LoggerInterface;
 
 class LoggerProxy implements LoggerInterface
 {
+    /** @var LoggerInterface|LoggerInterface[] */
     protected $loggers;
 
     /**
      * LoggerProxy constructor.
      *
-     * @param LoggerInterface|array $loggers
+     * @param LoggerInterface|LoggerInterface[] $loggers
      *
      * @return  void
      */
@@ -169,7 +170,6 @@ class LoggerProxy implements LoggerInterface
     {
         /** @var \Psr\Log\LoggerInterface $logger */
         foreach ((array)$this->loggers as $logger) {
-
             $logger->$method(...$parameters);
         }
     }

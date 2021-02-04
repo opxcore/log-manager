@@ -23,7 +23,7 @@ class LogManagerTest extends TestCase
 
     public function testNoConfig(): void
     {
-        $logger = new LogManager([]);
+        $logger = new LogManager(null, []);
 
         $this->expectException(LogManagerException::class);
 
@@ -32,7 +32,7 @@ class LogManagerTest extends TestCase
 
     public function testNoDriver(): void
     {
-        $logger = new LogManager(['default' => 'testing', 'loggers' => []]);
+        $logger = new LogManager('testing', []);
 
         $this->expectException(LogManagerException::class);
 
@@ -42,15 +42,13 @@ class LogManagerTest extends TestCase
 
     public function testNormal(): void
     {
-        $logger = new LogManager([
-            'default' => 'testing',
-            'loggers' => [
+        $logger = new LogManager('testing',
+            [
                 'testing1' => [
                     'driver' => TestingLogger::class,
                     'param' => 'Testing'
                 ],
-            ],
-        ]);
+            ]);
 
         $driver1 = new TestingLogger('testing 1');
         $driver2 = new TestingLogger('testing 2');
@@ -140,11 +138,8 @@ class LogManagerTest extends TestCase
 
     public function testNoGroup(): void
     {
-        $logger = new LogManager([
-            'default' => 'testing',
-            'groups' => [
-                'local' => ['testing1', 'testing2'],
-            ],
+        $logger = new LogManager('testing', [], [
+            'local' => ['testing1', 'testing2'],
         ]);
 
         $driver1 = new TestingLogger('testing 1');
@@ -165,11 +160,8 @@ class LogManagerTest extends TestCase
 
     public function testGroup(): void
     {
-        $logger = new LogManager([
-            'default' => 'testing',
-            'groups' => [
-                'local' => ['testing1', 'testing2'],
-            ],
+        $logger = new LogManager('testing', [], [
+            'local' => ['testing1', 'testing2'],
         ]);
 
         $driver1 = new TestingLogger('testing 1');
@@ -197,15 +189,13 @@ class LogManagerTest extends TestCase
 
     public function testWrongLogger(): void
     {
-        $logger = new LogManager([
-            'default' => 'testing',
-            'loggers' => [
+        $logger = new LogManager('testing',
+            [
                 'testing' => [
                     'driver' => WrongTestingLogger::class,
                     'param' => 'Testing'
                 ],
-            ],
-        ]);
+            ]);
 
         $this->expectException(LogManagerException::class);
 
@@ -214,7 +204,7 @@ class LogManagerTest extends TestCase
 
     public function testMakeException(): void
     {
-        $logger = new LogManager([]);
+        $logger = new LogManager(null, []);
         $logger->bind('test', function () {
             return new WrongTestingLogger;
         });
@@ -226,14 +216,12 @@ class LogManagerTest extends TestCase
 
     public function testDriverNotFound(): void
     {
-        $logger = new LogManager([
-            'default' => 'testing',
-            'loggers' => [
+        $logger = new LogManager('testing',
+            [
                 'testing' => [
                     'driver' => 'NotTestingLogger',
                 ],
-            ],
-        ]);
+            ]);
 
         $this->expectException(LogManagerException::class);
 
@@ -242,12 +230,9 @@ class LogManagerTest extends TestCase
 
     public function testDriverNoParam(): void
     {
-        $logger = new LogManager([
-            'default' => 'testing',
-            'loggers' => [
-                'testing' => [
-                    'driver' => TestingLogger::class,
-                ],
+        $logger = new LogManager('testing', [
+            'testing' => [
+                'driver' => TestingLogger::class,
             ],
         ]);
 
@@ -258,13 +243,10 @@ class LogManagerTest extends TestCase
 
     public function testNoDriverClass(): void
     {
-        $logger = new LogManager([
-            'default' => 'testing',
-            'loggers' => [
-                'testing' => [
-                    'driver' => '',
-                    'param' => 'Testing'
-                ],
+        $logger = new LogManager('testing', [
+            'testing' => [
+                'driver' => '',
+                'param' => 'Testing'
             ],
         ]);
 

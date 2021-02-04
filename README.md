@@ -25,7 +25,7 @@ composer require opxcore/log-manager
 ```php
 use OpxCore\Log\LogManager;
 
-$manager = new LogManager($config);
+$manager = new LogManager($default, $loggers);
 ```
 
 ## Creating with [container](https://github.com/opxcore/container)
@@ -37,7 +37,11 @@ use OpxCore\Log\LogManager;
 $container->bind(
     LoggerInterface::class,
     LogManager::class,
-    ['config' => $config],
+    [
+        'default' => $default,
+        'loggers' => $loggers,
+        'groups' => $groups,
+    ]
 );
 
 $manager = $container->make(LoggerInterface::class);
@@ -48,7 +52,11 @@ or
 ```php
 $container->bind(LoggerInterface::class, LogManager::class);
 
-$manager = $container->make(LoggerInterface::class, ['config' => $config]);
+$manager = $container->make(LoggerInterface::class, [
+        'default' => $default,
+        'loggers' => $loggers,
+        'groups' => $groups,
+    ]);
 ```
 
 Where $config is configuration for log manager (see below).
@@ -56,8 +64,8 @@ Where $config is configuration for log manager (see below).
 ## Configuring and using
 
 Configuration array consists of two keys. Value of `'default'` must contain name
-(or array of names) of logger to be used as default logger. `'loggers'` is a set of loggers to be used keyed by name.
-Required parameter of each logger is a
+(or array of names) of logger to be used as default logger. `'loggers'` is a set of loggers to be used keyed by name. A
+required parameter of each logger is a
 `'driver'` containing class name of logger to be used with corresponding name
 (See examples below). Third additional key `'groups'` contain array of driver groups keyed by name.
 
@@ -65,7 +73,7 @@ Log manager extends [container](https://github.com/opxcore/container), so logger
 dependency injections. All loggers will be resolved on demand and instanced for future use. All parameters
 except `'driver'` will be passed to logger constructor as parameters.
 
-Additionally you can bind custom created logger:
+Additionally, you can bind custom created logger:
 
 ```php
 $manager->bind('custom_logger', function() {
@@ -83,8 +91,8 @@ To get multiple log drivers use same method with array of names
 In both cases `LoggerProxy` class with chosen loggers bindings will be returned,
 so `$manager->driver([$name1, $name2])->log($message)` will call log action on each of logger.
 
-To use group logging use `$manager->group($group)` or `$manager->group([$group1, $group2])`. Each group will be resolved to
-set of drivers and then merged together, removing duplicates.
+To use group logging use `$manager->group($group)` or `$manager->group([$group1, $group2])`. Each group will be resolved
+to set of drivers and then merged together, removing duplicates.
 
 ## PSR-3
 
@@ -109,11 +117,8 @@ These methods will call corresponding method of log driver set as default.
 Log manager configuration:
 
 ```php
-$config = [
-    'default' => 'file',    
-    // Also you can use
-    // 'default' => ['file', 'null'],    
-    'loggers' => [
+    $default = 'file'; // Also you can use 'default' => ['file', 'null'],    
+    $loggers = [
         'file' => [
             'driver' => \OpxCore\Log\LogFile::class,
             'filename' => '/www/project/logs',
@@ -121,12 +126,11 @@ $config = [
         'null' => [
             'driver' => \OpxCore\Log\LogNull::class,
         ]
-    ],
-    'groups' => [
+    ];
+    $groups = [
         'local' => ['file', 'null'],
         'network' => ['email'],
-    ],
-];
+    ];
 ```
 
 Logger class:
@@ -136,9 +140,9 @@ namespace \OpxCore\Log;
 
 class LogFile implements \Psr\Log\LoggerInterface
 {
-    protected $filename;
+    protected string $filename;
     
-    public function __create($filename)
+    public function __construct(string $filename)
     {
         $this->filename = $filename;
     }
@@ -149,7 +153,7 @@ class LogFile implements \Psr\Log\LoggerInterface
 
 Calling `$manager->driver('file')` at first time will create and return LogFile class instance (for this example is
 equal to `new \OpxCore\Log\LogFile('/www/project/logs')`)
-and store it's instance for future use. So calling `$manager->driver('file')` for second time will return same instance
+and store it's an instance for future use. So calling `$manager->driver('file')` for second time will return same instance
 of logger.
 
 For this example using
