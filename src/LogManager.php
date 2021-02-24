@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 
 class LogManager extends Container implements LoggerInterface
 {
-    /** @var string|array Default log driver(s) */
+    /** @var string|array Default logger(s) */
     protected $default;
 
     /** @var array Loggers definitions */
@@ -56,7 +56,7 @@ class LogManager extends Container implements LoggerInterface
      */
     public function emergency($message, array $context = []): void
     {
-        $this->driver()->emergency($message, $context);
+        $this->logger()->emergency($message, $context);
     }
 
     /**
@@ -74,7 +74,7 @@ class LogManager extends Container implements LoggerInterface
      */
     public function alert($message, array $context = []): void
     {
-        $this->driver()->alert($message, $context);
+        $this->logger()->alert($message, $context);
     }
 
     /**
@@ -91,7 +91,7 @@ class LogManager extends Container implements LoggerInterface
      */
     public function critical($message, array $context = []): void
     {
-        $this->driver()->critical($message, $context);
+        $this->logger()->critical($message, $context);
     }
 
     /**
@@ -107,7 +107,7 @@ class LogManager extends Container implements LoggerInterface
      */
     public function error($message, array $context = []): void
     {
-        $this->driver()->error($message, $context);
+        $this->logger()->error($message, $context);
     }
 
     /**
@@ -125,7 +125,7 @@ class LogManager extends Container implements LoggerInterface
      */
     public function warning($message, array $context = []): void
     {
-        $this->driver()->warning($message, $context);
+        $this->logger()->warning($message, $context);
     }
 
     /**
@@ -140,7 +140,7 @@ class LogManager extends Container implements LoggerInterface
      */
     public function notice($message, array $context = []): void
     {
-        $this->driver()->notice($message, $context);
+        $this->logger()->notice($message, $context);
     }
 
     /**
@@ -157,7 +157,7 @@ class LogManager extends Container implements LoggerInterface
      */
     public function info($message, array $context = []): void
     {
-        $this->driver()->info($message, $context);
+        $this->logger()->info($message, $context);
     }
 
     /**
@@ -172,11 +172,11 @@ class LogManager extends Container implements LoggerInterface
      */
     public function debug($message, array $context = []): void
     {
-        $this->driver()->debug($message, $context);
+        $this->logger()->debug($message, $context);
     }
 
     /**
-     * Logs with a default driver.
+     * Logs with a default logger.
      *
      * @param mixed $level
      * @param $message
@@ -189,11 +189,11 @@ class LogManager extends Container implements LoggerInterface
      */
     public function log($level, $message, array $context = []): void
     {
-        $this->driver()->log($level, $message, $context);
+        $this->logger()->log($level, $message, $context);
     }
 
     /**
-     * Get logger assigned with channel name.
+     * Get logger assigned to name.
      *
      * @param string|array|null $names
      *
@@ -201,13 +201,13 @@ class LogManager extends Container implements LoggerInterface
      *
      * @throws  LogManagerException
      */
-    public function driver($names = null): LoggerInterface
+    public function logger($names = null): LoggerInterface
     {
-        $driverNames = $this->resolveDriverNames($names);
+        $loggerNames = $this->resolveLoggerNames($names);
 
-        $drivers = $this->resolveDrivers($driverNames);
+        $loggers = $this->resolveLoggers($loggerNames);
 
-        return new LoggerProxy($drivers);
+        return new LoggerProxy($loggers);
     }
 
     /**
@@ -221,22 +221,22 @@ class LogManager extends Container implements LoggerInterface
      */
     public function group($names): LoggerInterface
     {
-        $drivers = [[]];
+        $loggers = [[]];
 
         foreach ((array)$names as $name) {
             if (!isset($this->groups[$name])) {
                 throw new LogManagerException("Group {$name} not found");
             }
 
-            $drivers[] = $this->groups[$name];
+            $loggers[] = $this->groups[$name];
         }
 
-        return $this->driver(array_unique(array_merge(...$drivers)));
+        return $this->logger(array_unique(array_merge(...$loggers)));
     }
 
     /**
-     * Detect if default driver has to be used. Additionally convert string to
-     * array if single driver given.
+     * Detect if default logger has to be used.
+     * Convert string to array if single logger given.
      *
      * @param string|array|null $names
      *
@@ -244,13 +244,13 @@ class LogManager extends Container implements LoggerInterface
      *
      * @throws  LogManagerException
      */
-    protected function resolveDriverNames($names): array
+    protected function resolveLoggerNames($names): array
     {
         if ($names === null) {
             $names = $this->default ?? null;
 
             if (!$names) {
-                throw new LogManagerException('Default log driver not assigned.');
+                throw new LogManagerException('Default logger not assigned.');
             }
         }
 
@@ -258,7 +258,7 @@ class LogManager extends Container implements LoggerInterface
     }
 
     /**
-     * Resolve all given names for corresponding drivers.
+     * Resolve all given names for corresponding loggers.
      *
      * @param array $names
      *
@@ -266,20 +266,20 @@ class LogManager extends Container implements LoggerInterface
      *
      * @throws LogManagerException
      */
-    protected function resolveDrivers(array $names): array
+    protected function resolveLoggers(array $names): array
     {
         $resolved = [];
 
         foreach ($names as $name) {
 
-            $resolved[] = $this->resolveSingleDriver($name);
+            $resolved[] = $this->resolveSingleLogger($name);
         }
 
         return $resolved;
     }
 
     /**
-     * Get or create driver instance.
+     * Get or create logger instance.
      *
      * @param string $name
      *
@@ -287,47 +287,47 @@ class LogManager extends Container implements LoggerInterface
      *
      * @throws LogManagerException
      */
-    protected function resolveSingleDriver(string $name): LoggerInterface
+    protected function resolveSingleLogger(string $name): LoggerInterface
     {
         if ($this->has($name)) {
             try {
-                $driver = $this->make($name);
+                $logger = $this->make($name);
 
             } catch (ContainerException | NotFoundException $e) {
 
                 throw new LogManagerException("Can not resolve [{$name}]: {$e->getMessage()}.", 0, $e);
             }
 
-            if (!($driver instanceof LoggerInterface)) {
+            if (!($logger instanceof LoggerInterface)) {
                 throw new LogManagerException("[{$name}] must implement interface Psr\Log\LoggerInterface");
             }
 
-            return $driver;
+            return $logger;
         }
 
         $config = $this->loggers[$name] ?? null;
 
         if (!$config) {
-            throw new LogManagerException("Configuration for driver [{$name}] not found.");
+            throw new LogManagerException("Configuration for logger [{$name}] not found.");
         }
 
-        $driverClass = $config['driver'] ?? null;
+        $loggerClass = $config['driver'] ?? null;
 
-        if (!$driverClass) {
-            throw new LogManagerException("Driver not set for [{$name}].");
+        if (!$loggerClass) {
+            throw new LogManagerException("Logger not set for [{$name}].");
         }
 
         unset($config['driver']);
 
-        $driver = $this->makeDriver($driverClass, $config);
+        $logger = $this->makeLogger($loggerClass, $config);
 
-        $this->instance($name, $driver);
+        $this->instance($name, $logger);
 
-        return $driver;
+        return $logger;
     }
 
     /**
-     * Build driver instance.
+     * Build logger instance.
      *
      * @param string $name
      * @param array $parameters
@@ -336,20 +336,20 @@ class LogManager extends Container implements LoggerInterface
      *
      * @throws LogManagerException
      */
-    protected function makeDriver(string $name, array $parameters): LoggerInterface
+    protected function makeLogger(string $name, array $parameters): LoggerInterface
     {
         try {
-            $driver = $this->make($name, $parameters);
+            $logger = $this->make($name, $parameters);
 
-            if (!$driver instanceof LoggerInterface) {
+            if (!$logger instanceof LoggerInterface) {
                 throw new LogManagerException("[$name] must be instance of [Psr\Log\LoggerInterface].");
             }
 
-            return $driver;
+            return $logger;
 
         } catch (ContainerException | NotFoundException $e) {
 
-            throw new LogManagerException("Con not log create driver for [{$name}]: {$e->getMessage()}", 0, $e);
+            throw new LogManagerException("Can not create log for [{$name}]: {$e->getMessage()}", 0, $e);
         }
     }
 }

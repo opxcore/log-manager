@@ -125,7 +125,7 @@ class LogManagerTest extends TestCase
         $driver1->logs = [];
         $driver2->logs = [];
 
-        $logger->driver(['testing1', 'testing2', 'testing'])->debug('Test');
+        $logger->logger(['testing1', 'testing2', 'testing'])->debug('Test');
         self::assertEquals(
             [['level' => Psr\Log\LogLevel::DEBUG, 'message' => 'Test', 'context' => []]],
             $driver1->logs
@@ -211,7 +211,7 @@ class LogManagerTest extends TestCase
 
         $this->expectException(LogManagerException::class);
 
-        $logger->driver('test')->log(Psr\Log\LogLevel::DEBUG, 'Test');
+        $logger->logger('test')->log(Psr\Log\LogLevel::DEBUG, 'Test');
     }
 
     public function testDriverNotFound(): void
