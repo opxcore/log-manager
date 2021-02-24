@@ -20,6 +20,7 @@
   "require": {
     "php": "^7.4",
     "opxcore/log-interface": "^1.0.8",
+    "opxcore/log-manager-interface": "^1.0.0",
     "opxcore/container": "^1.0.3"
   },
   "require-dev": {

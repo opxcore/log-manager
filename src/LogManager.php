@@ -14,10 +14,11 @@ use OpxCore\Container\Container;
 use OpxCore\Container\Exceptions\ContainerException;
 use OpxCore\Container\Exceptions\NotFoundException;
 use OpxCore\Log\Exceptions\LogManagerException;
+use OpxCore\Log\Interfaces\LogManagerInterface;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
-class LogManager extends Container implements LoggerInterface
+class LogManager extends Container implements LogManagerInterface
 {
     /** @var string|array Default logger(s) */
     protected $default;
